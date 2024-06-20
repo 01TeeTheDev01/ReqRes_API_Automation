@@ -182,4 +182,37 @@ public class ReqResRequestBuilder {
                 .extract()
                 .response();
     }
+
+    public Response registerRequest(String firstName, String lastName, String job){
+        var newUserBuilder = new ReqResPOSTPayloadBuilder();
+
+        var newUserBody = newUserBuilder.withFirstName(firstName)
+                .withLastName(lastName)
+                .withJob(job)
+                .build();
+
+        if(newUserBody == null)
+            return null;
+
+        var json = reqResContentType.getContentType(ReqResContentTypeEnum.JSON);
+
+        var requestResponse = given()
+                .when()
+                .contentType(json)
+                .body(newUserBody)
+                .post(String.format("%s/api/register",
+                        ReqResBasePath.reqResBasePath))
+                .then()
+                .log()
+                .body()
+                .extract()
+                .response();
+
+        ReqResResponse.id = requestResponse.jsonPath().getString("id");
+        ReqResResponse.name = requestResponse.jsonPath().getString("name");
+        ReqResResponse.job = requestResponse.jsonPath().getString("job");
+        ReqResResponse.createdAt = requestResponse.jsonPath().getString("createdAt");
+
+        return requestResponse;
+    }
 }
