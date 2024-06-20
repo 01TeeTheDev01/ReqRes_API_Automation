@@ -184,7 +184,42 @@ public class ReqResRequestBuilder {
     }
 
     public Response registerRequest(String email, String password){
-        var loginBuilder = new ReqResRegisterBuilder();
+        var registerBuilder = new ReqResRegisterBuilder();
+
+        var registerBody =
+                registerBuilder
+                        .withEmail(email)
+                        .withPassword(password)
+                        .build();
+
+        if(registerBody == null)
+            return null;
+
+        var json = reqResContentType.getContentType(ReqResContentTypeEnum.JSON);
+
+        var requestResponse = given()
+                .when()
+                .contentType(json)
+                .body(registerBody)
+                .log()
+                .body()
+                .post(String.format("%s/api/register",
+                        ReqResBasePath.reqResBasePath))
+                .then()
+                .log()
+                .body()
+                .extract()
+                .response();
+
+        ReqResResponse.id = requestResponse.jsonPath().getString("id");
+        ReqResResponse.token = requestResponse.jsonPath().getString("token");
+        ReqResResponse.error = requestResponse.jsonPath().getString("error");
+
+        return requestResponse;
+    }
+
+    public Response loginRequest(String email, String password){
+        var loginBuilder = new ReqResLoginBuilder();
 
         var loginBody =
                 loginBuilder
@@ -203,7 +238,7 @@ public class ReqResRequestBuilder {
                 .body(loginBody)
                 .log()
                 .body()
-                .post(String.format("%s/api/register",
+                .post(String.format("%s/api/login",
                         ReqResBasePath.reqResBasePath))
                 .then()
                 .log()
@@ -211,7 +246,6 @@ public class ReqResRequestBuilder {
                 .extract()
                 .response();
 
-        ReqResResponse.id = requestResponse.jsonPath().getString("id");
         ReqResResponse.token = requestResponse.jsonPath().getString("token");
         ReqResResponse.error = requestResponse.jsonPath().getString("error");
 

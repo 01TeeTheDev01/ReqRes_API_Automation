@@ -361,4 +361,41 @@ public class ReqResApiTests {
                 .statusCode(ReqResHttpStatusCode.BAD_REQUEST.getCode())
                 .body("error", equalTo(ReqResResponse.error));
     }
+
+    @Test(dependsOnMethods = {"POST_registerUnsuccessful"})
+    @Story("LOGIN SUCCESSFULLY")
+    @Description("AS AN API USER, I LOGIN SUCCESSFULLY")
+    @Severity(SeverityLevel.CRITICAL)
+    public void POST_loginSuccessful(){
+
+        var email = "eve.holt@reqres.in";
+        var password = "pistol";
+
+        var registerRequest = new ReqResRequestBuilder()
+                .loginRequest(email, password);
+
+        registerRequest
+                .then()
+                .assertThat()
+                .statusCode(ReqResHttpStatusCode.OK.getCode())
+                .body("token", equalTo(ReqResResponse.token));
+    }
+
+    @Test(dependsOnMethods = {"POST_loginSuccessful"})
+    @Story("LOGIN UNSUCCESSFUL")
+    @Description("AS AN API USER, I LOGIN UNSUCCESSFULLY")
+    @Severity(SeverityLevel.CRITICAL)
+    public void POST_loginUnsuccessful(){
+
+        var email = "eve.holt@reqres.in";
+
+        var registerRequest = new ReqResRequestBuilder()
+                .loginRequest(email, "");
+
+        registerRequest
+                .then()
+                .assertThat()
+                .statusCode(ReqResHttpStatusCode.BAD_REQUEST.getCode())
+                .body("error", equalTo(ReqResResponse.error));
+    }
 }
