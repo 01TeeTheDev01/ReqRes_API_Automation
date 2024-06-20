@@ -323,4 +323,42 @@ public class ReqResApiTests {
                 .statusCode(ReqResHttpStatusCode.NO_CONTENT.getCode())
                 .body(emptyOrNullString());
     }
+
+    @Test(dependsOnMethods = {"DELETE_SingleUser"})
+    @Story("REGISTER SUCCESSFULLY")
+    @Description("AS AN API USER, I REGISTER SUCCESSFULLY")
+    @Severity(SeverityLevel.CRITICAL)
+    public void POST_registerSuccessful(){
+
+        var email = "eve.holt@reqres.in";
+        var password = "pistol";
+
+        var registerRequest = new ReqResRequestBuilder()
+                .registerRequest(email, password);
+
+        registerRequest
+                .then()
+                .assertThat()
+                .statusCode(ReqResHttpStatusCode.OK.getCode())
+                .body("id", equalTo(Integer.parseInt(ReqResResponse.id)))
+                .body("token", equalTo(ReqResResponse.token));
+    }
+
+    @Test(dependsOnMethods = {"POST_registerSuccessful"})
+    @Story("REGISTER UNSUCCESSFUL")
+    @Description("AS AN API USER, I REGISTER UNSUCCESSFULLY")
+    @Severity(SeverityLevel.CRITICAL)
+    public void POST_registerUnsuccessful(){
+
+        var email = "eve.holt@reqres.in";
+
+        var registerRequest = new ReqResRequestBuilder()
+                .registerRequest(email, "");
+
+        registerRequest
+                .then()
+                .assertThat()
+                .statusCode(ReqResHttpStatusCode.BAD_REQUEST.getCode())
+                .body("error", equalTo(ReqResResponse.error));
+    }
 }

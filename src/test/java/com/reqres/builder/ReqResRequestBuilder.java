@@ -183,15 +183,16 @@ public class ReqResRequestBuilder {
                 .response();
     }
 
-    public Response registerRequest(String firstName, String lastName, String job){
-        var newUserBuilder = new ReqResPOSTPayloadBuilder();
+    public Response registerRequest(String email, String password){
+        var loginBuilder = new ReqResRegisterBuilder();
 
-        var newUserBody = newUserBuilder.withFirstName(firstName)
-                .withLastName(lastName)
-                .withJob(job)
-                .build();
+        var loginBody =
+                loginBuilder
+                        .withEmail(email)
+                        .withPassword(password)
+                        .build();
 
-        if(newUserBody == null)
+        if(loginBody == null)
             return null;
 
         var json = reqResContentType.getContentType(ReqResContentTypeEnum.JSON);
@@ -199,7 +200,9 @@ public class ReqResRequestBuilder {
         var requestResponse = given()
                 .when()
                 .contentType(json)
-                .body(newUserBody)
+                .body(loginBody)
+                .log()
+                .body()
                 .post(String.format("%s/api/register",
                         ReqResBasePath.reqResBasePath))
                 .then()
@@ -209,9 +212,8 @@ public class ReqResRequestBuilder {
                 .response();
 
         ReqResResponse.id = requestResponse.jsonPath().getString("id");
-        ReqResResponse.name = requestResponse.jsonPath().getString("name");
-        ReqResResponse.job = requestResponse.jsonPath().getString("job");
-        ReqResResponse.createdAt = requestResponse.jsonPath().getString("createdAt");
+        ReqResResponse.token = requestResponse.jsonPath().getString("token");
+        ReqResResponse.error = requestResponse.jsonPath().getString("error");
 
         return requestResponse;
     }

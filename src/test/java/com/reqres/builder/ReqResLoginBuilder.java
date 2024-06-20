@@ -17,16 +17,10 @@ public class ReqResLoginBuilder {
     }
 
     public ReqResLoginBuilder withEmail(String email){
-        if(email.isBlank() || email.isEmpty())
-            return null;
-
         return new ReqResLoginBuilder(email, password);
     }
 
     public ReqResLoginBuilder withPassword(String password){
-        if(password.isBlank() || password.isEmpty())
-            return null;
-
         return new ReqResLoginBuilder(email, password);
     }
 
