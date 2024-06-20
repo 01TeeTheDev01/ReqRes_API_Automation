@@ -1,6 +1,7 @@
 package com.reqres.models;
 
-public class ReqResData {
+public class ReqResUserData {
+
     private final String id;
     private final String email;
     private final String first_name;
@@ -27,7 +28,7 @@ public class ReqResData {
         return avatar;
     }
 
-    public ReqResData(String id, String email, String firstName, String lastName, String avatar){
+    public ReqResUserData(String id, String email, String firstName, String lastName, String avatar){
         this.id = id;
         this.email = email;
         this.first_name = firstName;

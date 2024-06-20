@@ -2,21 +2,24 @@ package com.reqres.builder;
 
 import com.reqres.common.ReqResBasePath;
 import com.reqres.common.ReqResContentType;
-import com.reqres.reponses.ReqResPostResponse;
+import com.reqres.reponses.ReqResResponse;
 import com.reqres.utils.ReqResContentTypeEnum;
 import io.restassured.response.Response;
 
 import static io.restassured.RestAssured.given;
 
 public class ReqResRequestBuilder {
+
     private final ReqResContentType reqResContentType;
+
+    private final int maxUserId = 12;
 
     public ReqResRequestBuilder(){
         reqResContentType = new ReqResContentType();
     }
 
-    public Response createNewUserRequest(String firstName, String lastName, String job){
-        var newUserBuilder = new ReqResNewUserPayloadBuilder();
+    public Response createUserRequest(String firstName, String lastName, String job){
+        var newUserBuilder = new ReqResPOSTPayloadBuilder();
 
         var newUserBody = newUserBuilder.withFirstName(firstName)
                                         .withLastName(lastName)
@@ -32,25 +35,27 @@ public class ReqResRequestBuilder {
                 .when()
                 .contentType(json)
                 .body(newUserBody)
-                .post(String.format("%s/api/users", ReqResBasePath.reqResBasePath))
+                .post(String.format("%s/api/users",
+                        ReqResBasePath.reqResBasePath))
                 .then()
                 .log()
                 .body()
                 .extract()
                 .response();
 
-        ReqResPostResponse.id = requestResponse.jsonPath().getString("id");
-        ReqResPostResponse.name = requestResponse.jsonPath().getString("name");
-        ReqResPostResponse.job = requestResponse.jsonPath().getString("job");
-        ReqResPostResponse.createdAt = requestResponse.jsonPath().getString("createdAt");
+        ReqResResponse.id = requestResponse.jsonPath().getString("id");
+        ReqResResponse.name = requestResponse.jsonPath().getString("name");
+        ReqResResponse.job = requestResponse.jsonPath().getString("job");
+        ReqResResponse.createdAt = requestResponse.jsonPath().getString("createdAt");
 
         return requestResponse;
     }
 
-    public Response getUserByIdRequest(String id){
+    public Response getUserByIdRequest(int id){
         return given()
                 .when()
-                .get(String.format("%s/api/users/%s", ReqResBasePath.reqResBasePath, id))
+                .get(String.format("%s/api/users/%s",
+                        ReqResBasePath.reqResBasePath, id))
                 .then()
                 .log()
                 .body()
@@ -61,7 +66,8 @@ public class ReqResRequestBuilder {
     public Response getListUsers(int pageNum){
         return given()
                 .when()
-                .get(String.format("%s/api/users?page=%s", ReqResBasePath.reqResBasePath, pageNum))
+                .get(String.format("%s/api/users?page=%s",
+                        ReqResBasePath.reqResBasePath, pageNum))
                 .then()
                 .log()
                 .body()
@@ -72,7 +78,104 @@ public class ReqResRequestBuilder {
     public Response getListUsers(){
         return given()
                 .when()
-                .get(String.format("%s/api/unknown", ReqResBasePath.reqResBasePath))
+                .get(String.format("%s/api/unknown",
+                        ReqResBasePath.reqResBasePath))
+                .then()
+                .log()
+                .body()
+                .extract()
+                .response();
+    }
+
+    public Response getSingleUserByResourceRequest(int id){
+        if(id > 0 && id <= maxUserId){
+            return given()
+                    .when()
+                    .get(String.format("%s/api/unknown/%s",
+                            ReqResBasePath.reqResBasePath, id))
+                    .then()
+                    .log()
+                    .body()
+                    .extract()
+                    .response();
+        }
+
+        return given()
+                .when()
+                .get(String.format("%s/api/unknown/%s",
+                        ReqResBasePath.reqResBasePath, maxUserId))
+                .then()
+                .log()
+                .body()
+                .extract()
+                .response();
+    }
+
+    public Response getSingleUserByResourceNotFoundRequest(int id){
+        if(id > maxUserId){
+            return given()
+                    .when()
+                    .get(String.format("%s/api/unknown/%s",
+                            ReqResBasePath.reqResBasePath, id))
+                    .then()
+                    .log()
+                    .body()
+                    .extract()
+                    .response();
+        }
+
+        return given()
+                .when()
+                .get(String.format("%s/api/unknown/%s",
+                        ReqResBasePath.reqResBasePath, maxUserId + 1))
+                .then()
+                .log()
+                .body()
+                .extract()
+                .response();
+    }
+
+    public Response updateUserByIdRequest(int id, String firstName, String lastName, String job){
+        var updateUserBuilder = new ReqResPUTPayloadBuilder();
+
+        var updateUserBody = updateUserBuilder
+                .withFirstName(firstName)
+                .withLastName(lastName)
+                .withJob(job).build();
+
+        if(updateUserBody == null)
+            return null;
+
+        var json = reqResContentType.getContentType(ReqResContentTypeEnum.JSON);
+
+        var requestResponse =
+                given()
+                        .when()
+                        .contentType(json)
+                        .body(updateUserBody)
+                        .log()
+                        .body()
+                        .put(String.format("%s/api/users/%s",
+                                ReqResBasePath.reqResBasePath, id))
+                        .then()
+                        .log()
+                        .body()
+                        .extract()
+                        .response();
+
+        ReqResResponse.id = requestResponse.jsonPath().getString("id");
+        ReqResResponse.name = requestResponse.jsonPath().getString("name");
+        ReqResResponse.job = requestResponse.jsonPath().getString("job");
+        ReqResResponse.createdAt = requestResponse.jsonPath().getString("updatedAt");
+
+        return requestResponse;
+    }
+
+    public Response deleteUserByIdRequest(int id){
+        return given()
+                .when()
+                .delete(String.format("%s/api/users/%s",
+                        ReqResBasePath.reqResBasePath, id))
                 .then()
                 .log()
                 .body()

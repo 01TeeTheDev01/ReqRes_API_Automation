@@ -6,7 +6,7 @@ import com.reqres.base.ReqResBase;
 import com.reqres.builder.ReqResRequestBuilder;
 import com.reqres.common.ReqResHttpStatusCode;
 import com.reqres.models.*;
-import com.reqres.reponses.ReqResPostResponse;
+import com.reqres.reponses.ReqResResponse;
 import io.qameta.allure.*;
 import org.testng.annotations.Test;
 
@@ -16,41 +16,26 @@ import static org.hamcrest.Matchers.*;
 
 @Feature("ReqRes-API")
 public class ReqResApiTests {
+
     private Faker faker;
+    private final Gson gson;
+    private final int userId = 22;
 
-    @Test
-    @Story("CREATE SINGE USER WITH MISSING NAME")
-    @Description("AS AN API USER, CREATE USER WITH MISSING NAME.")
-    @Severity(SeverityLevel.CRITICAL)
-    public void createNewUserWithEmptyNameTest(){
+    public ReqResApiTests(){
         faker = new Faker();
-
-        var newUserRequest = new ReqResRequestBuilder()
-                .createNewUserRequest(
-                        null,
-                        null,
-                        faker.job().position()
-                );
-
-        newUserRequest
-                .then()
-                .assertThat()
-                .statusCode(ReqResHttpStatusCode.CREATED.getCode())
-                .body("id", equalTo(ReqResPostResponse.id))
-                .body("name", equalTo(ReqResPostResponse.name))
-                .body("job", equalTo(ReqResPostResponse.job))
-                .body("createdAt", equalTo(ReqResPostResponse.createdAt));
+        gson = new Gson();
     }
 
-    @Test(dependsOnMethods = {"createNewUserWithEmptyNameTest"})
+    @Test
     @Story("CREATE SINGLE USER")
     @Description("AS AN API USER, CREATE A SINGLE USER.")
     @Severity(SeverityLevel.CRITICAL)
-    public void createNewUserTest(){
+    public void POST_createUser(){
+
         faker = new Faker();
 
         var newUserRequest = new ReqResRequestBuilder()
-                .createNewUserRequest(
+                .createUserRequest(
                         faker.name().firstName(),
                         faker.name().lastName(),
                         faker.job().position()
@@ -60,20 +45,46 @@ public class ReqResApiTests {
                 .then()
                 .assertThat()
                 .statusCode(ReqResHttpStatusCode.CREATED.getCode())
-                .body("id", equalTo(ReqResPostResponse.id))
-                .body("name", equalTo(ReqResPostResponse.name))
-                .body("job", equalTo(ReqResPostResponse.job))
-                .body("createdAt", equalTo(ReqResPostResponse.createdAt));
+                .body("id", equalTo(ReqResResponse.id))
+                .body("name", equalTo(ReqResResponse.name))
+                .body("job", equalTo(ReqResResponse.job))
+                .body("createdAt", equalTo(ReqResResponse.createdAt));
+    }
+
+    @Test(dependsOnMethods = {"POST_createUser"})
+    @Story("CREATE SINGLE USER")
+    @Description("AS AN API USER, CREATE A SINGLE USER.")
+    @Severity(SeverityLevel.CRITICAL)
+    public void PUT_updateUser(){
+
+        faker = new Faker();
+
+        var updateRequest = new ReqResRequestBuilder()
+                .updateUserByIdRequest(
+                        Integer.parseInt(ReqResResponse.id),
+                        faker.name().firstName(),
+                        faker.name().lastName(),
+                        faker.job().position()
+                );
+
+        updateRequest
+                .then()
+                .assertThat()
+                .statusCode(ReqResHttpStatusCode.OK.getCode())
+                .body("id", equalTo(ReqResResponse.id))
+                .body("name", equalTo(ReqResResponse.name))
+                .body("job", equalTo(ReqResResponse.job))
+                .body("updatedAt", equalTo(ReqResResponse.createdAt));
     }
 
     @Test
     @Story("GET SINGLE USER NOT FOUND")
     @Description("AS AN API USER, TRY TO GET A SINGLE USER THAT DOES NOT EXIST.")
-    @Severity(SeverityLevel.CRITICAL)
-    public void getSingleUserNotFound(){
+    @Severity(SeverityLevel.NORMAL)
+    public void GET_SingleUserNotFound(){
 
         var getUserRequest = new ReqResRequestBuilder()
-                .getUserByIdRequest("100");
+                .getUserByIdRequest(userId);
 
         getUserRequest
                 .then()
@@ -82,23 +93,26 @@ public class ReqResApiTests {
                 .body(notNullValue());
     }
 
-    @Test(dependsOnMethods = {"getSingleUserNotFound"})
+    @Test(dependsOnMethods = {"GET_SingleUserNotFound"})
     @Story("GET SINGLE USER")
     @Description("AS AN API USER, GET A SINGLE USER")
-    @Severity(SeverityLevel.CRITICAL)
-    public void getSingleUser(){
+    @Severity(SeverityLevel.NORMAL)
+    public void GET_SingleUser(){
 
         var getUserRequest = new ReqResRequestBuilder()
-                .getUserByIdRequest("2");
+                .getUserByIdRequest(2);
+
+        var userData = getUserRequest.body().jsonPath().getMap("data");
+        var userSupport = getUserRequest.body().jsonPath().getMap("support");
 
         var model = new ReqResUser(
-                new ReqResData(String.valueOf(getUserRequest.body().jsonPath().getMap("data").get("id")),
-                        String.valueOf(getUserRequest.body().jsonPath().getMap("data").get("email")),
-                        String.valueOf(getUserRequest.body().jsonPath().getMap("data").get("first_name")),
-                        String.valueOf(getUserRequest.body().jsonPath().getMap("data").get("last_name")),
-                        String.valueOf(getUserRequest.body().jsonPath().getMap("data").get("avatar"))),
-                new ReqResSupport(String.valueOf(getUserRequest.body().jsonPath().getMap("support").get("url")),
-                        String.valueOf(getUserRequest.body().jsonPath().getMap("support").get("text"))));
+                new ReqResUserData(String.valueOf(userData.get("id")),
+                        String.valueOf(userData.get("email")),
+                        String.valueOf(userData.get("first_name")),
+                        String.valueOf(userData.get("last_name")),
+                        String.valueOf(userData.get("avatar"))),
+                new ReqResSupport(String.valueOf(userSupport.get("url")),
+                        String.valueOf(userSupport.get("text"))));
 
         int expectedId = Integer.parseInt(model.getReqResData().getId());
         String expectedEmail = model.getReqResData().getEmail();
@@ -121,11 +135,77 @@ public class ReqResApiTests {
                 .body("support.text", equalTo(expectedText));
     }
 
-    @Test(dependsOnMethods = {"getSingleUser"})
+    @Test(dependsOnMethods = {"GET_SingleUser"})
+    @Story("GET SINGLE USER BY <RESOURCE>")
+    @Description("AS AN API USER, GET A SINGLE USER BY <RESOURCE>")
+    @Severity(SeverityLevel.MINOR)
+    public void GET_SingleUserByResource(){
+
+        var getUserRequest = new ReqResRequestBuilder()
+                .getSingleUserByResourceRequest(8);
+
+        var userData = getUserRequest.body().jsonPath().getMap("data");
+        var userSupport = getUserRequest.body().jsonPath().getMap("support");
+
+        var model = new ReqResUnknown(
+                Integer.parseInt(userData.get("id").toString()),
+                userData.get("name").toString(),
+                Integer.parseInt(userData.get("year").toString()),
+                userData.get("color").toString(),
+                userData.get("pantone_value").toString(),
+                new ReqResSupport(
+                        userSupport.get("url").toString(),
+                        userSupport.get("text").toString())
+        );
+
+        int expectedId = Integer.parseInt(String.valueOf(model.id()));
+        String expectedName = model.name();
+        int expectedYear = Integer.parseInt(String.valueOf(model.year()));
+        String expectedColor = model.color();
+        String expectedPantone = model.pantone_value();
+        String expectedUrl = model.support().url();
+        String expectedText = model.support().text();
+
+        getUserRequest
+                .then()
+                .assertThat()
+                .statusCode(ReqResHttpStatusCode.OK.getCode())
+                .body("data.id", equalTo(expectedId))
+                .body("data.name", equalTo(expectedName))
+                .body("data.year", equalTo(expectedYear))
+                .body("data.color", equalTo(expectedColor))
+                .body("data.pantone_value", equalTo(expectedPantone))
+                .body("support.url", equalTo(expectedUrl))
+                .body("support.text", equalTo(expectedText));
+    }
+
+    @Test(dependsOnMethods = {"GET_SingleUserByResource"})
+    @Story("GET SINGLE USER BY <RESOURCE> NOT FOUND")
+    @Description("AS AN API USER, GET A SINGLE USER BY <RESOURCE> NOT FOUND")
+    @Severity(SeverityLevel.MINOR)
+    public void GET_SingleUserByResourceNotFound(){
+
+        var getUserRequest = new ReqResRequestBuilder()
+                .getSingleUserByResourceNotFoundRequest(12);
+
+        var userData = getUserRequest.body().jsonPath().getMap("data");
+        var userSupport = getUserRequest.body().jsonPath().getMap("support");
+
+        if(userData == null || userData.isEmpty() ||
+                userSupport == null || userSupport.isEmpty())
+            getUserRequest
+                    .then()
+                    .assertThat()
+                    .statusCode(ReqResHttpStatusCode.NOT_FOUND.getCode())
+                    .log()
+                    .body();
+    }
+
+    @Test(dependsOnMethods = {"GET_SingleUser"})
     @Story("LIST USERS BY PAGE NUMBER")
     @Description("AS AN API USER, GET A LIST OF USERS BY THE PAGE NUMBER.")
     @Severity(SeverityLevel.CRITICAL)
-    public void getAllUsers(){
+    public void GET_AllUsers(){
 
         var getUsersRequest = new ReqResRequestBuilder()
                 .getListUsers(2);
@@ -135,12 +215,12 @@ public class ReqResApiTests {
                 .jsonPath()
                 .getList("data");
 
-        List<ReqResData> reqResUserData = new ArrayList<>();
+        List<ReqResUserData> reqResUserData = new ArrayList<>();
 
-        for(var userObject : new Gson().toJsonTree(userCollection).getAsJsonArray()){
+        for(var userObject : gson.toJsonTree(userCollection).getAsJsonArray()){
             var userMap = userObject.getAsJsonObject().asMap();
             reqResUserData.add(
-                    new ReqResData(
+                    new ReqResUserData(
                             userMap.get("id").getAsString(),
                             userMap.get("email").getAsString(),
                             userMap.get("first_name").getAsString(),
@@ -158,7 +238,8 @@ public class ReqResApiTests {
                 Integer.parseInt(per_page),
                 Integer.parseInt(total),
                 Integer.parseInt(total_pages),
-                reqResUserData);
+                reqResUserData
+        );
 
         var base = (ReqResBase)model;
 
@@ -173,11 +254,11 @@ public class ReqResApiTests {
                 .body("data", not(0));
     }
 
-    @Test(dependsOnMethods = {"getAllUsers"})
+    @Test(dependsOnMethods = {"GET_AllUsers"})
     @Story("GET USER LIST <RESOURCE>")
     @Description("AS AN API USER, GET A LIST OF USERS BY RESOURCE.")
-    @Severity(SeverityLevel.CRITICAL)
-    public void getAllUsersByResource(){
+    @Severity(SeverityLevel.MINOR)
+    public void GET_AllUsersByResource(){
 
         var getUsersRequest = new ReqResRequestBuilder()
                 .getListUsers();
@@ -189,7 +270,7 @@ public class ReqResApiTests {
 
         List<ReqResUnknown> reqResUnknownUserData = new ArrayList<>();
 
-        for(var userObject : new Gson().toJsonTree(userCollection).getAsJsonArray()){
+        for(var userObject : gson.toJsonTree(userCollection).getAsJsonArray()){
             var userMap = userObject.getAsJsonObject().asMap();
             reqResUnknownUserData.add(
                     new ReqResUnknown(
@@ -197,7 +278,8 @@ public class ReqResApiTests {
                             userMap.get("name").getAsString(),
                             Integer.parseInt(userMap.get("year").getAsString()),
                             userMap.get("color").getAsString(),
-                            userMap.get("pantone_value").getAsString()));
+                            userMap.get("pantone_value").getAsString(),
+                            null));
         }
 
         var page = getUsersRequest.body().jsonPath().get("page").toString();
@@ -224,5 +306,21 @@ public class ReqResApiTests {
                 .body("total", equalTo(base.getTotal()))
                 .body("total_pages", equalTo(base.getTotal_pages()))
                 .body("data", not(0));
+    }
+
+    @Test(dependsOnMethods = {"PUT_updateUser"})
+    @Story("DELETE SINGLE USER")
+    @Description("AS AN API USER, DELETE SINGLE USER")
+    @Severity(SeverityLevel.NORMAL)
+    public void DELETE_SingleUser(){
+
+        var deleteUserRequest = new ReqResRequestBuilder()
+                .deleteUserByIdRequest(userId);
+
+        deleteUserRequest
+                .then()
+                .assertThat()
+                .statusCode(ReqResHttpStatusCode.NO_CONTENT.getCode())
+                .body(emptyOrNullString());
     }
 }

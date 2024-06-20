@@ -1,6 +1,7 @@
 package com.reqres.base;
 
 public abstract class ReqResBase {
+
     private final int page, per_page, total, total_pages;
 
     public ReqResBase (int page, int per_page, int total, int total_pages){

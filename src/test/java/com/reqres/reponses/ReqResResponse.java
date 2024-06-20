@@ -1,5 +1,5 @@
 package com.reqres.reponses;
 
-public class ReqResPostResponse {
+public class ReqResResponse {
     public static String id, name, job, createdAt;
 }

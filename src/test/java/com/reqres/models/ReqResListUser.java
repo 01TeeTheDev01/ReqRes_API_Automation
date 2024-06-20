@@ -5,14 +5,15 @@ import com.reqres.base.ReqResBase;
 import java.util.List;
 
 public class ReqResListUser extends ReqResBase {
-    private final List<ReqResData> reqResUserCollection;
 
-    public ReqResListUser (int page, int perPage, int total, int totalPages, List<ReqResData> reqResUserCollection){
+    private final List<ReqResUserData> reqResUserCollection;
+
+    public ReqResListUser (int page, int perPage, int total, int totalPages, List<ReqResUserData> reqResUserCollection){
         super(page, perPage, total, totalPages);
         this.reqResUserCollection = reqResUserCollection;
     }
 
-    public List<ReqResData> getReqResList_UserCollection() {
+    public List<ReqResUserData> getReqResList_UserCollection() {
         return reqResUserCollection;
     }
 }
