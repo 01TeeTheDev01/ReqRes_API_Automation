@@ -37,8 +37,9 @@ jobs:
 
       - name: Generate Allure Reports
         run: |
-          ./HTMLReport.bat
+          ./HTMLReport.bat  # This command starts the Allure server locally
 
+      # Optional: You can archive the generated Allure reports as artifacts if needed
       - name: Archive Reports
         uses: actions/upload-artifact@v4
         with:
