@@ -33,6 +33,7 @@ public class ReqResRequestBuilder {
 
         var requestResponse = given()
                 .when()
+                //.header("Authorization", "dstvnw")
                 .contentType(json)
                 .body(newUserBody)
                 .post(String.format("%s/api/users",
