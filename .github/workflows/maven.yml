@@ -16,11 +16,11 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -28,8 +28,17 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
-    - name: Build with Maven
-      run: mvn clean test
-      
-    - name: Run with Maven
-      run: mvn test
+    - name: Build and Test with Maven
+      run: |
+          mvn clean test
+
+    - name: Generate Reports
+      run: |
+        chmod +x HTMLReport.bat  # Ensure batch file is executable (Linux/Unix)
+        ./HTMLReport.bat         # Execute the batch file to generate reports
+
+    - name: Archive Reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-reports  # Artifact name
+        path: allure-reports/  # Path to directory containing reports

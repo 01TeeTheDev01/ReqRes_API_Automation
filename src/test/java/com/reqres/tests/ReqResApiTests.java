@@ -7,6 +7,7 @@ import com.reqres.builder.ReqResRequestBuilder;
 import com.reqres.common.ReqResHttpStatusCode;
 import com.reqres.models.*;
 import com.reqres.reponses.ReqResResponse;
+
 import io.qameta.allure.*;
 import org.testng.annotations.Test;
 
