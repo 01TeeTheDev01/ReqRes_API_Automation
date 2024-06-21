@@ -22,9 +22,10 @@ jobs:
 
       - name: Install Allure Command Line
         run: |
-          wget https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.29.0/allure-commandline-2.29.0.zip
-          unzip allure-commandline-2.29.0.zip -d /opt
-          export PATH="/opt/allure-2.29.0/bin:$PATH"
+          wget -O allure-2.29.0.zip https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.29.0/allure-commandline-2.29.0.zip
+          unzip allure-2.29.0.zip -d /opt/allure
+          export PATH="/opt/allure/allure-2.29.0/bin:$PATH"
+          allure --version  # Verify Allure installation
 
       - name: Build and Test with Maven
         run: |
