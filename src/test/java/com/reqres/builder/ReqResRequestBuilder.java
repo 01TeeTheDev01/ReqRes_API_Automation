@@ -39,8 +39,6 @@ public class ReqResRequestBuilder {
                 .post(String.format("%s/api/users",
                         ReqResBasePath.reqResBasePath))
                 .then()
-                .log()
-                .body()
                 .extract()
                 .response();
 
@@ -58,8 +56,6 @@ public class ReqResRequestBuilder {
                 .get(String.format("%s/api/users/%s",
                         ReqResBasePath.reqResBasePath, id))
                 .then()
-                .log()
-                .body()
                 .extract()
                 .response();
     }
@@ -70,8 +66,6 @@ public class ReqResRequestBuilder {
                 .get(String.format("%s/api/users?page=%s",
                         ReqResBasePath.reqResBasePath, pageNum))
                 .then()
-                .log()
-                .body()
                 .extract()
                 .response();
     }
@@ -82,8 +76,6 @@ public class ReqResRequestBuilder {
                 .get(String.format("%s/api/unknown",
                         ReqResBasePath.reqResBasePath))
                 .then()
-                .log()
-                .body()
                 .extract()
                 .response();
     }
@@ -95,8 +87,6 @@ public class ReqResRequestBuilder {
                     .get(String.format("%s/api/unknown/%s",
                             ReqResBasePath.reqResBasePath, id))
                     .then()
-                    .log()
-                    .body()
                     .extract()
                     .response();
         }
@@ -106,8 +96,6 @@ public class ReqResRequestBuilder {
                 .get(String.format("%s/api/unknown/%s",
                         ReqResBasePath.reqResBasePath, maxUserId))
                 .then()
-                .log()
-                .body()
                 .extract()
                 .response();
     }
@@ -119,8 +107,6 @@ public class ReqResRequestBuilder {
                     .get(String.format("%s/api/unknown/%s",
                             ReqResBasePath.reqResBasePath, id))
                     .then()
-                    .log()
-                    .body()
                     .extract()
                     .response();
         }
@@ -130,8 +116,6 @@ public class ReqResRequestBuilder {
                 .get(String.format("%s/api/unknown/%s",
                         ReqResBasePath.reqResBasePath, maxUserId + 1))
                 .then()
-                .log()
-                .body()
                 .extract()
                 .response();
     }
@@ -154,13 +138,9 @@ public class ReqResRequestBuilder {
                         .when()
                         .contentType(json)
                         .body(updateUserBody)
-                        .log()
-                        .body()
                         .put(String.format("%s/api/users/%s",
                                 ReqResBasePath.reqResBasePath, id))
                         .then()
-                        .log()
-                        .body()
                         .extract()
                         .response();
 
@@ -178,8 +158,6 @@ public class ReqResRequestBuilder {
                 .delete(String.format("%s/api/users/%s",
                         ReqResBasePath.reqResBasePath, id))
                 .then()
-                .log()
-                .body()
                 .extract()
                 .response();
     }
@@ -202,13 +180,9 @@ public class ReqResRequestBuilder {
                 .when()
                 .contentType(json)
                 .body(registerBody)
-                .log()
-                .body()
                 .post(String.format("%s/api/register",
                         ReqResBasePath.reqResBasePath))
                 .then()
-                .log()
-                .body()
                 .extract()
                 .response();
 
@@ -237,13 +211,9 @@ public class ReqResRequestBuilder {
                 .when()
                 .contentType(json)
                 .body(loginBody)
-                .log()
-                .body()
                 .post(String.format("%s/api/login",
                         ReqResBasePath.reqResBasePath))
                 .then()
-                .log()
-                .body()
                 .extract()
                 .response();
 

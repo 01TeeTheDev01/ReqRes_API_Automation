@@ -197,9 +197,7 @@ public class ReqResApiTests {
             getUserRequest
                     .then()
                     .assertThat()
-                    .statusCode(ReqResHttpStatusCode.NOT_FOUND.getCode())
-                    .log()
-                    .body();
+                    .statusCode(ReqResHttpStatusCode.NOT_FOUND.getCode());
     }
 
     @Test(dependsOnMethods = {"GET_SingleUser"})
