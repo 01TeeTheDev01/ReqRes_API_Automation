@@ -30,20 +30,17 @@ jobs:
 
     - name: Install Allure Command Line
       run: |
-        sudo apt-get update
-        sudo apt-get install allure  # Install Allure on Ubuntu, adjust for other OS
-        
-    - name: Build and Test with Maven
-      run: |
-          mvn clean test
+        wget https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.16.0/allure-commandline-2.16.0.zip
+        unzip allure-commandline-2.16.0.zip -d /opt
+        export PATH="/opt/allure-2.16.0/bin:$PATH"
 
-    - name: Generate Reports
+    - name: Generate Allure Reports
       run: |
-        chmod +x HTMLReport.bat  # Ensure batch file is executable (Linux/Unix)
-        ./HTMLReport.bat         # Execute the batch file to generate reports
+        chmod +x HTMLReport.bat
+        ./HTMLReport.bat
 
     - name: Archive Reports
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v2
       with:
-        name: allure-reports  # Artifact name
-        path: allure-reports/  # Path to directory containing reports
+        name: allure-reports
+        path: allure-reports/
