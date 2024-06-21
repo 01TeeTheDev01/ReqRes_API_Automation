@@ -2,42 +2,42 @@ name: Java CI with Maven and Allure Reports
 
 on:
   push:
-    branches: [ master ]  # Trigger workflow on push events to the master branch
+    branches: [ master ]
   pull_request:
-    branches: [ master ]  # Trigger workflow on pull requests to the master branch
+    branches: [ master ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Specifies the operating system for the job
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Checks out your repository's code
+        uses: actions/checkout@v4
 
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'  # Sets up JDK version 21 from Temurin
+          java-version: '21'
 
       - name: Install Allure Command Line
         run: |
           wget -O allure-2.29.0.zip https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.29.0/allure-commandline-2.29.0.zip
           unzip allure-2.29.0.zip -d /opt/allure
           export PATH="/opt/allure/allure-2.29.0/bin:$PATH"
-          allure --version  # Verifies Allure installation
+          allure --version  # Verify Allure installation
 
       - name: Build and Test with Maven
         run: |
-          mvn clean test  # Cleans the Maven project and runs tests
+          mvn clean test
 
       - name: Generate Allure Reports
         run: |
+          export PATH="/opt/allure/allure-2.29.0/bin:$PATH"
           allure generate allure-results/ --clean -o allure-report
-          # Generates Allure HTML reports from allure-results directory
 
       - name: Archive Reports
         uses: actions/upload-artifact@v4
         with:
-          name: allure-reports  # Specifies the name of the artifact
-          path: allure-report/  # Specifies the directory to archive as an artifact
+          name: allure-reports
+          path: allure-report/
