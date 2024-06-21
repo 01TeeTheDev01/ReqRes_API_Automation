@@ -27,6 +27,11 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+
+    - name: Install Allure Command Line
+      run: |
+        sudo apt-get update
+        sudo apt-get install allure  # Install Allure on Ubuntu, adjust for other OS
         
     - name: Build and Test with Maven
       run: |
